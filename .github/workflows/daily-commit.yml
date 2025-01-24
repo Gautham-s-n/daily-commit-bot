@@ -1,0 +1,30 @@
+name: Daily Commit Bot
+
+on:
+  schedule:
+    - cron: "0 0 * * *"  # Runs every day at midnight UTC
+
+jobs:
+  commit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Git
+        run: |
+          git config --global user.name "your-username"
+          git config --global user.email "your-email"
+
+      - name: Generate a random commit count for the day
+        id: random_count
+        run: echo "COMMITS=$(( (RANDOM % 5) + 1 ))" >> $GITHUB_ENV  # Max 5 commits per day
+
+      - name: Make multiple commits
+        run: |
+          for i in $(seq 1 ${{ env.COMMITS }}); do
+            echo "$(date): Commit number $i" >> log.md
+            git add log.md
+            git commit -m "Automated commit $i on $(date)"
+          done
+          git push
